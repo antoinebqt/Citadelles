@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>District.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projet2-e</a> &gt; <a href="index.source.html" class="el_package">citadelles.districts</a> &gt; <span class="el_source">District.java</span></div><h1>District.java</h1><pre class="source lang-java linenums">package citadelles.districts;
+
+import citadelles.bots.Bot;
+
+/**
+ * use as a basis to create all districts
+ */
+public class District {
+
+    private final String name;
+    private final int value;
+    private final int category;
+    private Bot currentBot;
+    private boolean canBeDestruct;
+    private int placedDuringTurn;
+
+    /**
+     * Create a district card
+     *
+     * @param name     of the district
+     * @param value    of the district
+     * @param category of the district
+     */
+<span class="fc" id="L24">    public District(String name, int value, int category) {</span>
+<span class="fc" id="L25">        this.name = name;</span>
+<span class="fc" id="L26">        this.value = value;</span>
+<span class="fc" id="L27">        this.category = category;</span>
+<span class="fc" id="L28">        canBeDestruct = true;</span>
+<span class="fc" id="L29">        placedDuringTurn = 0;</span>
+<span class="fc" id="L30">    }</span>
+
+    /**
+     * Get the name of the district
+     *
+     * @return the name
+     */
+    public String getName() {
+<span class="fc" id="L38">        return name;</span>
+    }
+
+    /**
+     * Get the value of the district
+     *
+     * @return the value
+     */
+    public int getValue() {
+<span class="fc" id="L47">        return value;</span>
+    }
+
+    /**
+     * Get the category of the district
+     *
+     * @return the category's ID
+     */
+    public int getCategory() {
+<span class="fc" id="L56">        return category;</span>
+    }
+
+    /**
+     * Get the card value at end of the game
+     *
+     * @return card value
+     */
+    public int getEndGameValue() {
+<span class="fc" id="L65">        return value;</span>
+    }
+
+    /**
+     * The action of the district
+     *
+     * NB: is overridden in extended class
+     */
+<span class="nc" id="L73">    public void action() {}</span>
+
+    /**
+     * The action of a district when it's placed
+     *
+     * @param turn The current turn of the game
+     */
+    public void actionWhenConstruct(int turn) {
+<span class="fc" id="L81">        placedDuringTurn = turn;</span>
+<span class="fc" id="L82">    }</span>
+
+    /**
+     * Get the turn the district got placed
+     *
+     * @return The turn
+     */
+    public int getPlacedDuringTurn() {
+<span class="fc" id="L90">        return placedDuringTurn;</span>
+    }
+
+    /**
+     * Det the current bot
+     *
+     * @return Bot object
+     */
+    public Bot getCurrentBot() {
+<span class="fc" id="L99">        return currentBot;</span>
+    }
+
+    /**
+     * Initialise the current bot
+     *
+     * @param currentBot Bot object
+     */
+    public void setCurrentBot(Bot currentBot) {
+<span class="fc" id="L108">        this.currentBot = currentBot;</span>
+<span class="fc" id="L109">    }</span>
+
+    /**
+     * check if the district can be destruct or not
+     *
+     * @return True if it can be destruct, false otherwise
+     */
+    public boolean isCanBeDestruct() {
+<span class="fc" id="L117">        return canBeDestruct;</span>
+    }
+
+    /**
+     * Change the value of the variable that indicates that the district can be destroyed
+     *
+     * @param isCanBeDestruct boolean
+     */
+    public void setCanBeDestruct(Boolean isCanBeDestruct) {
+<span class="fc" id="L126">        this.canBeDestruct = isCanBeDestruct;</span>
+<span class="fc" id="L127">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

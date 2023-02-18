@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Referee.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projet2-e</a> &gt; <a href="index.source.html" class="el_package">citadelles.bots</a> &gt; <span class="el_source">Referee.java</span></div><h1>Referee.java</h1><pre class="source lang-java linenums">package citadelles.bots;
+
+import citadelles.Citadelles;
+import citadelles.LogManager;
+import citadelles.characters.Character;
+import citadelles.characters.CharacterEnum;
+import citadelles.districts.CategoryEnum;
+import citadelles.districts.District;
+
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static citadelles.LogManager.defaultColor;
+import static com.diogonunes.jcolor.Ansi.colorize;
+import static com.diogonunes.jcolor.Attribute.*;
+
+/**
+ * Class that contain all the methods that manipulate the game after a decision of the bot
+ */
+public class Referee {
+    private BotManager botManager;
+
+    /**
+     * Referee constructor
+     */
+<span class="fc" id="L27">    public Referee() {</span>
+<span class="fc" id="L28">        this.botManager = Citadelles.getBotManager();</span>
+<span class="fc" id="L29">    }</span>
+
+    /**
+     * Set the bot manager
+     *
+     * @param botManager
+     */
+    public void setBotManager(BotManager botManager) {
+<span class="fc" id="L37">        this.botManager = botManager;</span>
+<span class="fc" id="L38">    }</span>
+
+    /**
+     * Kill the bot if it's possible
+     *
+     * @param assassinBot  The bot who made the kill
+     * @param roleIdToKill The character ID to kill
+     */
+    public void kill(Bot assassinBot, int roleIdToKill) {
+<span class="fc" id="L47">        Bot botToKill = existRoleToKill(botManager.getListBot(), roleIdToKill);</span>
+
+<span class="fc" id="L49">        addLog(Bot.addBotNumberLog(assassinBot.getID()) + defaultColor(&quot; killed someone&quot;));</span>
+
+<span class="fc bfc" id="L51" title="All 4 branches covered.">        if (botToKill != null &amp;&amp; roleIdToKill != CharacterEnum.ASSASSIN.getId()) {</span>
+<span class="fc" id="L52">            botToKill.setDead();</span>
+        } else {
+<span class="fc" id="L54">            addEndLog(defaultColor(&quot;Nobody was the character killed by the &quot;)</span>
+<span class="fc" id="L55">                    + colorize(&quot;Assassin&quot;, RED_TEXT()));</span>
+        }
+<span class="fc" id="L57">    }</span>
+
+    /**
+     * Check if a bot has the character to kill
+     *
+     * @param playerList   The bot list
+     * @param roleIDToKill The character ID to kill
+     * @return The bot to kill if exists, null otherwise
+     */
+    private Bot existRoleToKill(ArrayList&lt;Bot&gt; playerList, int roleIDToKill) {
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        for (Bot bot : playerList) {</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">            if (bot.getCharacterId() == roleIDToKill) {</span>
+<span class="fc" id="L69">                return bot;</span>
+            }
+<span class="fc" id="L71">        }</span>
+<span class="fc" id="L72">        return null;</span>
+    }
+
+    /**
+     * Add the number of district placed of a specific Category in Gold
+     *
+     * @param category The Category to convert district placed to gold
+     */
+    public void addGoldPerDistrictCategory(Bot bot, CategoryEnum category) {
+<span class="fc" id="L81">        int goldBonus = numberDistrictInCategory(bot.getDistrictPlaced(), category.getValue());</span>
+<span class="fc" id="L82">        String line = Bot.addBotNumberLog(bot.getID())</span>
+<span class="fc" id="L83">                + defaultColor(&quot; use the &quot;)</span>
+<span class="fc" id="L84">                + printCharacter(bot.getCharacterRole())</span>
+<span class="fc" id="L85">                + defaultColor(&quot; power&quot;);</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">        if (goldBonus &gt; 0) {</span>
+<span class="fc" id="L87">            bot.addGold(goldBonus);</span>
+<span class="fc" id="L88">            line += defaultColor(&quot; and gains &quot;) + printGold(goldBonus)</span>
+<span class="fc" id="L89">                    + defaultColor(&quot; because he has &quot;) + goldBonus</span>
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">                    + &quot; &quot; + printCategory(category) + defaultColor(goldBonus &gt; 1 ? &quot; districts&quot; : &quot; district&quot;);</span>
+        } else {
+<span class="fc" id="L92">            line += defaultColor(&quot; but has 0 &quot;) + printCategory(category) + defaultColor(&quot; district&quot;);</span>
+        }
+
+<span class="fc" id="L95">        addLog(line);</span>
+<span class="fc" id="L96">    }</span>
+
+    /**
+     * Simple formater for print a category
+     *
+     * @param category The category to print
+     * @return The string colored in the right way
+     */
+    private String printCategory(CategoryEnum category) {
+<span class="fc" id="L105">        return colorize(category.getName(), TEXT_COLOR(255, 0, 255));</span>
+    }
+
+    /**
+     * Simple formater for print a character
+     *
+     * @param character The character to print
+     * @return The string colored in the right way
+     */
+    private String printCharacter(String character) {
+<span class="fc" id="L115">        return colorize(character, RED_TEXT());</span>
+    }
+
+    /**
+     * Simple formater for print a district
+     *
+     * @param district The district to print
+     * @return The string colored in the right way
+     */
+    private String printDistrict(String district) {
+<span class="fc" id="L125">        return colorize(district, GREEN_TEXT());</span>
+    }
+
+    /**
+     * Count the number of district placed that are in the given category
+     *
+     * @param category The category ID to check
+     * @return The number of district of the category
+     */
+    public int numberDistrictInCategory(ArrayList&lt;District&gt; districts, int category) {
+<span class="fc" id="L135">        int count = 0;</span>
+
+<span class="fc bfc" id="L137" title="All 2 branches covered.">        for (District district : districts) {</span>
+<span class="fc bfc" id="L138" title="All 2 branches covered.">            if (district.getCategory() == category) count++;</span>
+<span class="fc" id="L139">        }</span>
+<span class="fc" id="L140">        return count;</span>
+    }
+
+    /**
+     * Check if the data is correct or not
+     *
+     * @param data The data to check
+     * @return True if yes, false otherwise
+     */
+    private boolean isDataCorrect(int[] data) {
+<span class="pc bpc" id="L150" title="2 of 4 branches missed.">        if (data == null || data.length != 2) return false;</span>
+<span class="fc bfc" id="L151" title="All 2 branches covered.">        if (data[0] - 1 &lt;= botManager.getNumberOfBots()) {</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">            return data[1] - 1 &lt;= botManager.getListBot().get(data[0]).getDistrictPlaced().size();</span>
+        }
+<span class="fc" id="L154">        return false;</span>
+    }
+
+    /**
+     * The method to destruct a district if possible
+     *
+     * @param bot  The bot who is the warlord and who try to destruct a district
+     * @param data The data containing the victim bot id and his district to destroy
+     */
+    public void destructOneDistrict(Bot bot, int[] data) {
+
+<span class="fc bfc" id="L165" title="All 2 branches covered.">        if (!isDataCorrect(data)) return;</span>
+<span class="fc" id="L166">        Bot player = botManager.getListBot().get(data[0]);</span>
+<span class="fc" id="L167">        District districtChosen = player.getDistrictPlaced().get(data[1]);</span>
+
+<span class="pc bpc" id="L169" title="2 of 6 branches missed.">        if (bot.getGold() &gt;= districtChosen.getValue() - 1 &amp;&amp; player.getCharacter().getId() != CharacterEnum.BISHOP.getId() &amp;&amp; districtChosen.isCanBeDestruct()) {</span>
+<span class="fc" id="L170">            player.getDistrictPlaced().remove(districtChosen);</span>
+<span class="fc" id="L171">            player.getHand().destructOneDistrict(districtChosen);</span>
+<span class="fc" id="L172">            bot.removeGold(districtChosen.getValue() - 1);</span>
+
+<span class="fc" id="L174">            addLog(Bot.addBotNumberLog(bot.getID()) + defaultColor(&quot; has destruct the district &quot;)</span>
+<span class="fc" id="L175">                    + printDistrict(districtChosen.getName()) + defaultColor(&quot; of &quot;)</span>
+<span class="fc" id="L176">                    + Bot.addBotNumberLog(player.getCurrentBotId()) + defaultColor(&quot; for the cost of &quot;)</span>
+<span class="fc" id="L177">                    + printGold((districtChosen.getValue() - 1)));</span>
+
+<span class="fc" id="L179">            Bot botWithGraveyard = botWithTheGraveyard();</span>
+
+<span class="pc bpc" id="L181" title="1 of 2 branches missed.">            if (botWithGraveyard != null) {</span>
+<span class="nc" id="L182">                String line = Bot.addBotNumberLog(botWithGraveyard.getID()) + defaultColor(&quot; has the &quot;) + printDistrict(&quot;Graveyard&quot;);</span>
+
+<span class="nc bnc" id="L184" title="All 2 branches missed.">                if (botWithGraveyard.logicGraveyard(districtChosen)) {</span>
+
+<span class="nc bnc" id="L186" title="All 2 branches missed.">                    if (Objects.equals(botWithGraveyard.getCharacterRole(), CharacterEnum.WARLORD.getRole())) {</span>
+<span class="nc" id="L187">                        line += defaultColor(&quot; and try to re-buy the &quot;) + printDistrict(districtChosen.getName())</span>
+<span class="nc" id="L188">                                + defaultColor(&quot; but he can't being the &quot;) + printCharacter(&quot;Warlord&quot;);</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">                    } else if (botWithGraveyard.getGold() &lt; 1) {</span>
+<span class="nc" id="L190">                        line += defaultColor(&quot; and try to re-buy the &quot;) + printDistrict(districtChosen.getName())</span>
+<span class="nc" id="L191">                                + defaultColor(&quot; but has &quot;) + printGold(0);</span>
+                    } else {
+<span class="nc" id="L193">                        botWithGraveyard.getHandList().add(districtChosen);</span>
+<span class="nc" id="L194">                        botWithGraveyard.removeGold(1);</span>
+<span class="nc" id="L195">                        line += defaultColor(&quot; and re-buy the &quot;) + printDistrict(districtChosen.getName())</span>
+<span class="nc" id="L196">                                + defaultColor(&quot; for &quot;) + printGold(1);</span>
+                    }
+                } else {
+<span class="nc" id="L199">                    line += defaultColor(&quot; but didn't choose to re-buy the &quot;) + printDistrict(districtChosen.getName());</span>
+                }
+<span class="nc" id="L201">                addLog(line);</span>
+            }
+        }
+<span class="fc" id="L204">    }</span>
+
+    /**
+     * Check if a bot has the Graveyard district
+     *
+     * @return The bot who has it if exists, null otherwise
+     */
+    private Bot botWithTheGraveyard() {
+
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">        for (int i = 0; i &lt; botManager.getNumberOfBots(); i++) {</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">            for (District district : botManager.getListBot().get(i).getDistrictPlaced()) {</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">                if (district.getName().equals(&quot;Graveyard&quot;)) {</span>
+<span class="nc" id="L216">                    return botManager.getListBot().get(i);</span>
+                }
+<span class="nc" id="L218">            }</span>
+        }
+<span class="fc" id="L220">        return null;</span>
+    }
+
+    /**
+     * The method to make the thief steals someone
+     *
+     * @param fromID The victim ID
+     * @param toID   The thief ID
+     */
+    public void steal(int fromID, int toID) {
+
+<span class="fc" id="L231">        Bot from = getBotWithCharId(fromID);</span>
+<span class="fc" id="L232">        Bot to = getBotWithCharId(toID);</span>
+<span class="pc bpc" id="L233" title="1 of 2 branches missed.">        if (from == null) {</span>
+<span class="nc" id="L234">            to.addLog(Bot.addBotNumberLog(to.getID())</span>
+<span class="nc" id="L235">                    + defaultColor(&quot; try to steal a character that is not assign so nothing append&quot;));</span>
+<span class="nc" id="L236">            return;</span>
+        }
+        Character deadChar;
+
+<span class="fc" id="L240">        Bot dead = getDead();</span>
+
+<span class="fc bfc" id="L242" title="All 2 branches covered.">        if (dead == null) {</span>
+<span class="fc" id="L243">            deadChar = to.getCharacter();</span>
+        } else {
+<span class="fc" id="L245">            deadChar = dead.getCharacter();</span>
+        }
+
+<span class="fc" id="L248">        String log = Bot.addBotNumberLog(to.getID()) + defaultColor(&quot; decide to steal &quot;)</span>
+<span class="fc" id="L249">                + colorize(String.valueOf(from.getCharacter().getRole()), RED_TEXT())</span>
+<span class="fc" id="L250">                + defaultColor(&quot; that have &quot;) + printGold(from.getGold());</span>
+
+<span class="fc bfc" id="L252" title="All 4 branches covered.">        if (!from.getCharacterRole().equals(&quot;Assassin&quot;) &amp;&amp; !from.getCharacterRole().equals(deadChar.getRole())) {</span>
+<span class="fc" id="L253">            to.setGold(to.getGold() + from.getGold());</span>
+<span class="fc" id="L254">            from.setGold(0);</span>
+<span class="fc" id="L255">            log += defaultColor(&quot;, now &quot;) + Bot.addBotNumberLog(to.getID()) + defaultColor(&quot; has &quot;)</span>
+<span class="fc" id="L256">                    + printGold(to.getGold()) + defaultColor(&quot; and &quot;) + Bot.addBotNumberLog(from.getID())</span>
+<span class="fc" id="L257">                    + defaultColor(&quot; has &quot;) + printGold(0);</span>
+<span class="fc bfc" id="L258" title="All 2 branches covered.">        } else if (from.getCharacterRole().equals(deadChar.getRole())) {</span>
+<span class="fc" id="L259">            log += defaultColor(&quot;, but &quot;) + Bot.addBotNumberLog(to.getID())</span>
+<span class="fc" id="L260">                    + defaultColor(&quot; has no succeed because &quot;) + Bot.addBotNumberLog(from.getID())</span>
+<span class="fc" id="L261">                    + defaultColor(&quot; is dead&quot;);</span>
+        } else {
+<span class="fc" id="L263">            log += defaultColor(&quot;, but &quot;) + Bot.addBotNumberLog(to.getID())</span>
+<span class="fc" id="L264">                    + defaultColor(&quot; has no succeed because &quot;) + Bot.addBotNumberLog(from.getID())</span>
+<span class="fc" id="L265">                    + defaultColor(&quot; is &quot;) + colorize(&quot;Assassin&quot;, RED_TEXT());</span>
+        }
+<span class="fc" id="L267">        to.addLog(log);</span>
+<span class="fc" id="L268">    }</span>
+
+    /**
+     * Get the bot who is currently dead
+     *
+     * @return The dead bot
+     */
+    private Bot getDead() {
+<span class="fc" id="L276">        AtomicReference&lt;Bot&gt; bot = new AtomicReference&lt;&gt;();</span>
+
+<span class="fc" id="L278">        botManager.getListBot().forEach(b -&gt; {</span>
+<span class="fc bfc" id="L279" title="All 2 branches covered.">            if (!b.isAlive()) bot.set(b);</span>
+<span class="fc" id="L280">        });</span>
+<span class="fc" id="L281">        return bot.get();</span>
+    }
+
+    /**
+     * Method who make the magician exchange his hand with someone else
+     *
+     * @param fromID The victim bot ID
+     * @param toID   The Magician bot ID
+     */
+    public void exchangeCards(int fromID, int toID) {
+
+<span class="fc" id="L292">        Bot from = botManager.getListBot().get(fromID);</span>
+<span class="fc" id="L293">        Bot to = botManager.getListBot().get(toID);</span>
+
+<span class="fc" id="L295">        to.addLog(Bot.addBotNumberLog(toID)</span>
+<span class="fc" id="L296">                + defaultColor(&quot; exchange his deck that has &quot;) + to.getHandSize()</span>
+<span class="fc" id="L297">                + defaultColor(&quot; Cards with the deck of &quot;)</span>
+<span class="fc" id="L298">                + Bot.addBotNumberLog(fromID)</span>
+<span class="fc" id="L299">                + defaultColor(&quot; that has &quot;) + from.getHandSize()</span>
+<span class="fc" id="L300">                + defaultColor(&quot; Cards&quot;));</span>
+
+<span class="fc" id="L302">        ArrayList&lt;District&gt; waiting = new ArrayList&lt;&gt;(from.getHandList());</span>
+
+<span class="fc" id="L304">        from.getHandList().clear();</span>
+<span class="fc" id="L305">        from.getHandList().addAll(to.getHandList());</span>
+
+<span class="fc" id="L307">        to.getHandList().clear();</span>
+<span class="fc" id="L308">        to.getHandList().addAll(waiting);</span>
+<span class="fc" id="L309">    }</span>
+
+    /**
+     * Get the bot with a given ID
+     *
+     * @param id The ID
+     * @return the bot with this ID
+     */
+    private Bot getBotWithCharId(int id) {
+<span class="fc" id="L318">        AtomicReference&lt;Bot&gt; bot = new AtomicReference&lt;&gt;();</span>
+
+<span class="fc" id="L320">        botManager.getListBot().forEach(b -&gt; {</span>
+<span class="fc bfc" id="L321" title="All 2 branches covered.">            if (b.getCharacterId() == id) bot.set(b);</span>
+<span class="fc" id="L322">        });</span>
+<span class="fc" id="L323">        return bot.get();</span>
+    }
+
+    /**
+     * Concatenate the log and the new message
+     *
+     * @param log String
+     */
+    void addLog(String log) {
+<span class="fc" id="L332">        LogManager.log += log + &quot;\n&quot;;</span>
+<span class="fc" id="L333">    }</span>
+
+    /**
+     * Concatenate a log for the end of the turn
+     *
+     * @param endLog String
+     */
+    void addEndLog(String endLog) {
+<span class="fc" id="L341">        LogManager.endTurnLog += endLog + &quot;\n&quot;;</span>
+<span class="fc" id="L342">    }</span>
+
+    /**
+     * Simple method to print a number of gold in gold colour
+     *
+     * @param nbOfGolds number of golds to print
+     * @return String with colour
+     */
+    private String printGold(int nbOfGolds) {
+<span class="fc bfc" id="L351" title="All 2 branches covered.">        return colorize(nbOfGolds + (nbOfGolds &gt; 1 ? &quot; golds&quot; : &quot; gold&quot;), TEXT_COLOR(255, 215, 0));</span>
+    }
+
+    /**
+     * Set the crown to the given bot
+     *
+     * @param bot The bot to set the crown
+     */
+    public void setCrown(Bot bot) {
+<span class="fc" id="L360">        bot.setCrown();</span>
+<span class="fc" id="L361">        addLog(Bot.addBotNumberLog(bot.getID()) + defaultColor(&quot; get the &quot;)</span>
+<span class="fc" id="L362">                + colorize(&quot;crown&quot;, YELLOW_TEXT())</span>
+<span class="fc" id="L363">                + defaultColor(&quot; for the next turn&quot;));</span>
+<span class="fc" id="L364">    }</span>
+
+    /**
+     * Method for the Factory district, exchange 3 golds for 3 cards
+     *
+     * @param currentBot The bot who has the Factory district placed
+     */
+    public void get3CardsFor3Gold(Bot currentBot) {
+<span class="fc" id="L372">        String line = Bot.addBotNumberLog(currentBot.getID())</span>
+<span class="fc" id="L373">                + defaultColor(&quot; used the &quot;) + printDistrict(&quot;Factory&quot;)</span>
+<span class="fc" id="L374">                + defaultColor(&quot; power and &quot;);</span>
+
+<span class="fc bfc" id="L376" title="All 2 branches covered.">        if (currentBot.getGold() &gt;= 3) {</span>
+<span class="fc" id="L377">            currentBot.removeGold(3);</span>
+<span class="fc" id="L378">            currentBot.pickCard(3);</span>
+<span class="fc" id="L379">            line += defaultColor(&quot;exchanged &quot;) + printGold(3) + defaultColor(&quot; for 3 cards&quot;);</span>
+        } else {
+<span class="fc" id="L381">            line += defaultColor(&quot;tried to exchange &quot;) + printGold(3)</span>
+<span class="fc" id="L382">                    + defaultColor(&quot; for 3 cards but only had &quot;) + printGold(currentBot.getGold());</span>
+        }
+<span class="fc" id="L384">        addLog(line);</span>
+<span class="fc" id="L385">    }</span>
+
+    /**
+     * Method for the School Of Magic district.
+     * Give the bot 1 gold if he is the King, the Merchant, the Warlord or the Bishop
+     *
+     * @param currentBot The bot who has the School Of Magic district placed
+     */
+    public void get1GoldFromMagicSchool(Bot currentBot) {
+<span class="fc" id="L394">        String line = Bot.addBotNumberLog(currentBot.getID()) + defaultColor(&quot; used the &quot;)</span>
+<span class="fc" id="L395">                + printDistrict(&quot;School Of Magic&quot;) + defaultColor(&quot; power &quot;);</span>
+
+<span class="fc bfc" id="L397" title="All 2 branches covered.">        if (canEarnGoldsFromDistrict(currentBot)) {</span>
+<span class="fc" id="L398">            currentBot.addGold(1);</span>
+<span class="fc" id="L399">            line += defaultColor(&quot;and gained &quot;) + printGold(1)</span>
+<span class="fc" id="L400">                    + defaultColor(&quot; because he is the &quot;) + printCharacter(currentBot.getCharacterRole());</span>
+        } else {
+<span class="fc" id="L402">            line += defaultColor(&quot;but can't perceive gold from district being the &quot;)</span>
+<span class="fc" id="L403">                    + printCharacter(currentBot.getCharacterRole());</span>
+        }
+<span class="fc" id="L405">        addLog(line);</span>
+<span class="fc" id="L406">    }</span>
+
+    /**
+     * Check if the bot can earn gold from district with his character
+     *
+     * @param currentBot The bot
+     * @return True if he can, false otherwise
+     */
+    private boolean canEarnGoldsFromDistrict(Bot currentBot) {
+<span class="fc" id="L415">        String role = currentBot.getCharacterRole();</span>
+
+<span class="fc bfc" id="L417" title="All 2 branches covered.">        return switch (role) {</span>
+<span class="fc" id="L418">            case &quot;King&quot;, &quot;Bishop&quot;, &quot;Merchant&quot;, &quot;Warlord&quot; -&gt; true;</span>
+<span class="fc" id="L419">            default -&gt; false;</span>
+        };
+    }
+
+    /**
+     * Method for the Laboratory district, exchange a card for 1 gold
+     *
+     * @param currentBot The bot who has the Laboratory district placed
+     */
+    public void get1GoldFor1Card(Bot currentBot, int indexOfCard) {
+<span class="fc bfc" id="L429" title="All 2 branches covered.">        if (currentBot.getHandList().size() - 1 &gt;= indexOfCard) {</span>
+<span class="fc" id="L430">            String line = Bot.addBotNumberLog(currentBot.getID()) + &quot; used the &quot; + printDistrict(&quot;Laboratory&quot;) + &quot; power and gained &quot; + printGold(1) + &quot; for dropping his &quot; + printDistrict(currentBot.getHandList().get(indexOfCard).getName());</span>
+
+<span class="fc" id="L432">            District districtToRemove = currentBot.getHandList().get(indexOfCard);</span>
+<span class="fc" id="L433">            currentBot.getHand().discard(districtToRemove);</span>
+<span class="fc" id="L434">            currentBot.getHandList().remove(indexOfCard);</span>
+
+<span class="fc" id="L436">            currentBot.addGold(1);</span>
+
+<span class="fc" id="L438">            addLog(line);</span>
+        }
+<span class="fc" id="L440">    }</span>
+
+    /**
+     * Place the given districts in the districtPlaced list of the bot if he had those districts
+     *
+     * @param currentBot
+     * @param dataDistrictToPlace
+     */
+    public void placeCards(Bot currentBot, ArrayList&lt;District&gt; dataDistrictToPlace) {
+<span class="fc" id="L449">        dataDistrictToPlace.forEach(district -&gt; {</span>
+<span class="fc bfc" id="L450" title="All 4 branches covered.">            if (currentBot.getGold() &gt;= district.getValue() &amp;&amp; currentBot.getHandList().contains(district)) {</span>
+<span class="fc" id="L451">                currentBot.placeCard(currentBot.getHandList().indexOf(district));</span>
+            } else {
+<span class="fc" id="L453">                addLog(Bot.addBotNumberLog(currentBot.getID()) + &quot; tried to place the &quot;</span>
+<span class="fc" id="L454">                        + printDistrict(district.getName()) + &quot; for &quot; + printGold(district.getValue()) + &quot; but has only &quot; + printGold(currentBot.getGold()));</span>
+            }
+<span class="fc" id="L456">        });</span>
+<span class="fc" id="L457">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

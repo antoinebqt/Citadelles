@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Hand.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projet2-e</a> &gt; <a href="index.source.html" class="el_package">citadelles</a> &gt; <span class="el_source">Hand.java</span></div><h1>Hand.java</h1><pre class="source lang-java linenums">package citadelles;
+
+import citadelles.districts.District;
+import citadelles.districts.DistrictManager;
+
+import java.util.ArrayList;
+
+/**
+ * create a hand of district and is given to a bot
+ */
+public class Hand {
+
+    private ArrayList&lt;District&gt; listCard;
+    private final DistrictManager districtManager;
+
+    /**
+     * Create the list that will contain the district not
+     * already placed of the bot
+     *
+     * @param districtManager the district manager
+     */
+<span class="fc" id="L22">    public Hand(DistrictManager districtManager) {</span>
+<span class="fc" id="L23">        int numberOfCards = 4;</span>
+<span class="fc" id="L24">        listCard = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L25">        this.districtManager = districtManager;</span>
+<span class="fc" id="L26">        listCard.addAll(pullDistrict(numberOfCards));</span>
+<span class="fc" id="L27">    }</span>
+
+    /**
+     * Add number of District Cards in the bot Hand.
+     *
+     * @param number int
+     */
+    public ArrayList&lt;District&gt; pullDistrict(int number) {
+<span class="fc" id="L35">        ArrayList&lt;District&gt; districtsPicked = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        for (int i = 0; i &lt; number; i++) {</span>
+<span class="fc" id="L37">            District district = districtManager.pickRandomCard();</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">            if (district != null) {</span>
+<span class="fc" id="L39">                districtsPicked.add(district);</span>
+            }
+        }
+<span class="fc" id="L42">        return districtsPicked;</span>
+    }
+
+    /**
+     * Get the list containing the districts card in the hand
+     *
+     * @return the card's list
+     */
+    public ArrayList&lt;District&gt; getListCard() {
+<span class="fc" id="L51">        return listCard;</span>
+    }
+
+    public void setListCard(ArrayList&lt;District&gt; newHandList) {
+<span class="fc" id="L55">        listCard = newHandList;</span>
+<span class="fc" id="L56">    }</span>
+
+    /**
+     * Get the size of the hand
+     *
+     * @return the hand's size
+     */
+    public int getListCardSize() {
+<span class="fc" id="L64">        return getListCard().size();</span>
+    }
+
+    /**
+     * Place the chosen district in the hand listCard et add the rest of the list in the Deck
+     *
+     * @param districtsPicked District list
+     * @param districtChosen  District
+     */
+    public void addCardChosen(ArrayList&lt;District&gt; districtsPicked, District districtChosen) {
+<span class="fc" id="L74">        listCard.add(districtChosen);</span>
+<span class="fc" id="L75">        districtsPicked.remove(districtChosen);</span>
+<span class="fc" id="L76">        districtManager.addDistricts(districtsPicked);</span>
+<span class="fc" id="L77">    }</span>
+
+    public void addAllCards(ArrayList&lt;District&gt; districtsPicked) {
+<span class="fc" id="L80">        listCard.addAll(districtsPicked);</span>
+<span class="fc" id="L81">    }</span>
+
+    public void destructOneDistrict(District district) {
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        if (listCard.contains(district)) {</span>
+<span class="fc" id="L85">            districtManager.addDistricts(district);</span>
+<span class="fc" id="L86">            listCard.remove(district);</span>
+        }
+<span class="fc" id="L88">    }</span>
+
+    /**
+     * Put back in the deck a certain number of district
+     *
+     * @param toDiscard The arraylist of District object
+     */
+    public void discard(ArrayList&lt;District&gt; toDiscard) {
+<span class="fc" id="L96">        districtManager.addDistricts(toDiscard);</span>
+<span class="fc" id="L97">    }</span>
+
+    /**
+     * Put back in the deck a District object
+     *
+     * @param toDiscard The district to put back in the deck
+     */
+    public void discard(District toDiscard) {
+<span class="fc" id="L105">        districtManager.addDistricts(toDiscard);</span>
+<span class="fc" id="L106">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

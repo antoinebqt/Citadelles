@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Laboratory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projet2-e</a> &gt; <a href="index.source.html" class="el_package">citadelles.districts</a> &gt; <span class="el_source">Laboratory.java</span></div><h1>Laboratory.java</h1><pre class="source lang-java linenums">package citadelles.districts;
+
+import citadelles.bots.Referee;
+
+/**
+ * contain the methods of the Laboratory
+ */
+public class Laboratory extends District {
+
+    /**
+     * Once per turn, you can discard a district card
+     * from your hand and receive a gold coin for it
+     */
+    Laboratory() {
+<span class="fc" id="L15">        super(&quot;Laboratory&quot;, 5, 5);</span>
+<span class="fc" id="L16">    }</span>
+
+    @Override
+    public void action() {
+<span class="nc" id="L20">        int indexOfCard = getCurrentBot().logicLaboratory();</span>
+<span class="nc bnc" id="L21" title="All 2 branches missed.">        if (indexOfCard != -1) {</span>
+<span class="nc" id="L22">            Referee referee = new Referee();</span>
+<span class="nc" id="L23">            referee.get1GoldFor1Card(getCurrentBot(), indexOfCard);</span>
+        }
+<span class="nc" id="L25">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

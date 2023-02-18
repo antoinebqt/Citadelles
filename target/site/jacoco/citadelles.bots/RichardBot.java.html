@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RichardBot.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projet2-e</a> &gt; <a href="index.source.html" class="el_package">citadelles.bots</a> &gt; <span class="el_source">RichardBot.java</span></div><h1>RichardBot.java</h1><pre class="source lang-java linenums">package citadelles.bots;
+
+import citadelles.BotView;
+import citadelles.GameView;
+import citadelles.Hand;
+import citadelles.characters.Character;
+import citadelles.districts.CategoryEnum;
+import citadelles.districts.District;
+
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static citadelles.characters.CharacterEnum.*;
+
+public class RichardBot extends Bot {
+    /**
+     * Bot's constructor
+     *
+     * @param id   of the bot that will be created
+     * @param hand The hand of the bot containing his cards
+     */
+    public RichardBot(int id, Hand hand) {
+<span class="fc" id="L23">        super(id, hand);</span>
+<span class="fc" id="L24">    }</span>
+
+    /**
+     * Logic to choose if the bot will draw card or get gold
+     *
+     * If he has the architect then he takes gold
+     * If he has a lot of gold (&gt;5) and less than 2 cards then he draws cards
+     * If he has 0 cards, then he draws
+     * Otherwise he takes gold
+     */
+    @Override
+    public void chooseCardOrGold() {
+<span class="fc bfc" id="L36" title="All 8 branches covered.">        if (getCharacterId() != ARCHITECT.getId() &amp;&amp; ((getGold() &gt; 5 &amp;&amp; getHandSize() &lt; 2) || getHandSize() == 0)) {</span>
+<span class="fc" id="L37">            chooseAddCard();</span>
+        } else {
+<span class="fc" id="L39">            chooseAddGold();</span>
+        }
+<span class="fc" id="L41">    }</span>
+
+    /**
+     * Method choosing if the bot will construct a district or not
+     *
+     */
+    @Override
+    public void eventuallyPlaceADistrict() {
+<span class="fc" id="L49">        District placeableDistrict = null;</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        if (getGameView().getSizeBiggerCity() == 6) {</span>
+<span class="fc" id="L51">            placeableDistrict = getDistrictHandMaxValue();</span>
+        } else {
+<span class="fc" id="L53">            placeableDistrict = getDistrictHandMinValue();</span>
+        }
+<span class="pc bpc" id="L55" title="1 of 4 branches missed.">        if (placeableDistrict != null &amp;&amp; getGold() &gt;= placeableDistrict.getValue()) {</span>
+<span class="fc" id="L56">            placeCard(getHandList().indexOf(placeableDistrict));</span>
+        }
+<span class="fc" id="L58">    }</span>
+
+    /**
+     * Logic of the bot if he is the Assassin
+     *
+     * if he is in head : kill warlord
+     * if someone has 6 quarters : kill bishop or warlord
+     * if someone has 5 quarters : kill king
+     * if someone very rich (&gt;= 6) : kill thief
+     * if someone rich and &gt;= 5 districts : kill architect
+     * else he kill someone randomly
+     *
+     * @return The id of the character to kill
+     */
+    @Override
+    public int logicAssassin() {
+<span class="fc bfc" id="L74" title="All 4 branches covered.">        if (getGameView().getSizeBiggerCity() == getNumberDistrictPlaced() &amp;&amp; !isDiscarded(WARLORD.getId()))</span>
+<span class="fc" id="L75">            return WARLORD.getId();</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        if (getGameView().getSizeBiggerCity() == 6) {</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">            if (!isDiscarded(BISHOP.getId())) return BISHOP.getId();</span>
+<span class="fc" id="L78">            else return WARLORD.getId();</span>
+        }
+<span class="fc bfc" id="L80" title="All 6 branches covered.">        if (getGameView().getMaxGold() &gt;= 4 &amp;&amp; getGameView().getDistrictOfMostRich() &gt;= 5 &amp;&amp; !isDiscarded(ARCHITECT.getId()))</span>
+<span class="fc" id="L81">            return ARCHITECT.getId();</span>
+<span class="fc bfc" id="L82" title="All 4 branches covered.">        if (getGameView().getSizeBiggerCity() == 5 &amp;&amp; !isDiscarded(KING.getId())) {</span>
+<span class="fc" id="L83">            return KING.getId();</span>
+        }
+<span class="fc bfc" id="L85" title="All 4 branches covered.">        if (getGameView().getMaxGold() &gt;= 6 &amp;&amp; !isDiscarded(THIEF.getId()))</span>
+<span class="fc" id="L86">            return THIEF.getId();</span>
+
+        int idRoleKilled;
+<span class="fc" id="L89">        int nbCharacters = getGameView().getListAllCharacters().size();</span>
+        do {
+<span class="fc" id="L91">            idRoleKilled = (int) (Math.random() * nbCharacters);</span>
+<span class="fc bfc" id="L92" title="All 4 branches covered.">        } while (idRoleKilled == ASSASSIN.getId() || isDiscarded(idRoleKilled));</span>
+
+<span class="fc" id="L94">        return idRoleKilled;</span>
+    }
+
+    /**
+     * Return in first the architect if hand size == 0
+     * Or try to pick the charactere with a earning gold action wich gain the most of gold possible
+     * Otherwise do the default action
+     *
+     * @param charactersPicked character arraylist
+     * @return a character
+     */
+    @Override
+    public Character chooseOneCharacter(ArrayList&lt;Character&gt; charactersPicked) {
+<span class="fc" id="L107">        int[] dataDistrictsPlaced = numberOfEachCategoriesPlaced();</span>
+<span class="fc" id="L108">        Character choice = null;</span>
+<span class="fc" id="L109">        int maxCitySize = 0;</span>
+<span class="fc" id="L110">        try{ maxCitySize = getGameView().getSizeBiggerCity();</span>
+<span class="pc" id="L111">        }catch (Exception e){}</span>
+
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        if (maxCitySize == 6) {</span>
+<span class="fc" id="L114">            choice = containCharacter(charactersPicked, ASSASSIN.getId(), BISHOP.getId(), WARLORD.getId());</span>
+        }
+<span class="fc bfc" id="L116" title="All 2 branches covered.">        else if (maxCitySize == 5) {</span>
+<span class="pc bpc" id="L117" title="2 of 6 branches missed.">            if (getDistrictPlaced().size() == 5 &amp;&amp; getGold() &gt;= 4 &amp;&amp; getHandSize() &gt; 0) {</span>
+<span class="fc" id="L118">                choice = containCharacter(charactersPicked, ARCHITECT.getId(), KING.getId(), ASSASSIN.getId(), BISHOP.getId(), WARLORD.getId());</span>
+            } else {
+<span class="fc" id="L120">                choice = containCharacter(charactersPicked, KING.getId(), ASSASSIN.getId(), WARLORD.getId(), BISHOP.getId());</span>
+            }
+        }
+
+        // if not in endgame so focus on the opportunistic strategy
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        if (choice == null) {</span>
+<span class="fc" id="L126">            int maxGoldBishop = maxGold(BISHOP.getId(), dataDistrictsPlaced);</span>
+<span class="fc" id="L127">            int maxGoldWarlord = maxGold(WARLORD.getId(), dataDistrictsPlaced);</span>
+<span class="fc bfc" id="L128" title="All 4 branches covered.">            if (maxGoldBishop &gt;= maxGoldWarlord &amp;&amp; maxGoldBishop &gt; 0) {</span>
+<span class="fc" id="L129">                choice = containCharacter(charactersPicked, BISHOP.getId(), WARLORD.getId(), THIEF.getId());</span>
+<span class="pc bpc" id="L130" title="1 of 4 branches missed.">            } else if (maxGoldBishop &lt; maxGoldWarlord &amp;&amp; maxGoldWarlord &gt; 0) {</span>
+<span class="fc" id="L131">                choice = containCharacter(charactersPicked, WARLORD.getId(), BISHOP.getId(), THIEF.getId());</span>
+            } else {
+<span class="fc" id="L133">                choice = containCharacter(charactersPicked, THIEF.getId(), BISHOP.getId(), WARLORD.getId());</span>
+            }
+        }
+
+        // if no choice done then choose the default strategy
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">        if (choice == null) {</span>
+<span class="nc" id="L139">            choice = super.chooseOneCharacter(charactersPicked);</span>
+        }
+<span class="fc" id="L141">        return choice;</span>
+    }
+
+    /**
+     * return the character with a given id or null
+     * the characterIds are checked in passed order
+     *
+     * @param characterIds
+     * @param charactersList
+     * @return return the character with a given id or null
+     */
+    private Character containCharacter(ArrayList&lt;Character&gt; charactersList, int... characterIds) {
+<span class="fc bfc" id="L153" title="All 2 branches covered.">        for (int characterId : characterIds) {</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">            for (Character character : charactersList) {</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">                if (character.getId() == characterId) return character;</span>
+<span class="fc" id="L156">            }</span>
+        }
+<span class="fc" id="L158">        return null;</span>
+    }
+
+    /**
+     * Logic of the bot if he is the Warlord
+     *
+     * Destruct the max value district in the city of the more advanced player
+     *
+     * @return A tab of int containing the player who will lose a district and the district to destroy
+     */
+    @Override
+    public int[] logicWarlord() {
+<span class="fc" id="L170">        BotView player = null;</span>
+<span class="fc" id="L171">        District districtChosen = null;</span>
+<span class="fc" id="L172">        int citySize = 0;</span>
+
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        for (BotView bot : getGameView().getListAllBots()) {</span>
+<span class="fc bfc" id="L175" title="All 8 branches covered.">            if (bot.getID() != getID() &amp;&amp; bot.getDistrictsPlaced().size() != 7 &amp;&amp; bot.getDistrictsPlaced().size() &gt; citySize &amp;&amp; bot.getCharacter().getId() != BISHOP.getId()) {</span>
+<span class="fc" id="L176">                int districtChosenValue = 100;</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">                for (District district : bot.getDistrictsPlaced()) {</span>
+<span class="fc bfc" id="L178" title="All 6 branches covered.">                    if (district.getValue() - 1 &lt;= getGold() &amp;&amp; district.getValue() &lt; districtChosenValue &amp;&amp; district.isCanBeDestruct()) {</span>
+<span class="fc" id="L179">                        districtChosen = district;</span>
+<span class="fc" id="L180">                        player = bot;</span>
+<span class="fc" id="L181">                        districtChosenValue = district.getValue();</span>
+<span class="fc" id="L182">                        citySize = bot.getDistrictsPlaced().size();</span>
+                    }
+<span class="fc" id="L184">                }</span>
+            }
+<span class="fc" id="L186">        }</span>
+<span class="fc" id="L187">        return buildDataWarlord(player, districtChosen);</span>
+    }
+
+    /**
+     * Logic of the bot if he is the Architect
+     *
+     * He tries to place his little card to place the maximum possible
+     *
+     * @return An arrayList of district to place
+     */
+    @Override
+    public ArrayList&lt;District&gt; logicArchitect() {
+<span class="fc" id="L199">        int gold = getGold();</span>
+<span class="fc" id="L200">        ArrayList&lt;District&gt; districtToPlace = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L201">        ArrayList&lt;District&gt; districtInHand = new ArrayList&lt;&gt;(getHandList());</span>
+
+<span class="fc bfc" id="L203" title="All 2 branches covered.">        for (int i = 0; i &lt; 2; i++) {</span>
+<span class="fc" id="L204">            District districtMinValue = null;</span>
+<span class="fc" id="L205">            int minValue = 100;</span>
+<span class="fc bfc" id="L206" title="All 2 branches covered.">            for (District district : districtInHand) {</span>
+<span class="fc bfc" id="L207" title="All 4 branches covered.">                if (districtCanBePlaced(district, gold) &amp;&amp; district.getValue() &lt; minValue) {</span>
+<span class="fc" id="L208">                    districtMinValue = district;</span>
+<span class="fc" id="L209">                    minValue = districtMinValue.getValue();</span>
+                }
+<span class="fc" id="L211">            }</span>
+            // If no district found, exit the loop
+<span class="fc bfc" id="L213" title="All 2 branches covered.">            if (districtMinValue == null) break;</span>
+
+<span class="fc" id="L215">            districtToPlace.add(districtMinValue);</span>
+<span class="fc" id="L216">            districtInHand.remove(districtMinValue);</span>
+<span class="fc" id="L217">            gold -= districtMinValue.getValue();</span>
+        }
+
+<span class="fc" id="L220">        return districtToPlace;</span>
+    }
+
+    /**
+     * Logic if the bot has the Laboratory district
+     *
+     * If he has more than one card and less than 4 gold, he chooses to exchange
+     * a card with a value lower than 3 (if he has one) for a gold
+     * or a card that he already place before
+     *
+     * @return The index of a card in his hand. -1 if he can't
+     */
+    @Override
+    public int logicLaboratory() {
+<span class="fc bfc" id="L234" title="All 4 branches covered.">        if (getHandSize() &gt; 0 &amp;&amp; getGold() &lt; 4) {</span>
+<span class="fc bfc" id="L235" title="All 2 branches covered.">            for (int i = 0; i &lt; getHandSize(); i++){</span>
+<span class="fc bfc" id="L236" title="All 2 branches covered.">                if (isDistrictAlreadyPlaced(getHandList().get(i).getName())){</span>
+<span class="fc" id="L237">                    return i;</span>
+                }
+            }
+<span class="fc" id="L240">            District minDistrict = getDistrictHandMinValue();</span>
+<span class="pc bpc" id="L241" title="1 of 2 branches missed.">            if (minDistrict != null){</span>
+<span class="fc bfc" id="L242" title="All 2 branches covered.">                if (minDistrict.getValue() &lt; 3){</span>
+<span class="fc" id="L243">                    return getHandList().indexOf(minDistrict);</span>
+                }
+            }
+        }
+<span class="fc" id="L247">        return -1;</span>
+    }
+
+    /**
+     * Logic if the bot has the Factory district
+     *
+     * If he has more than 7 gold and less than 4 districts
+     * placed, then he decides to exchange 3 golds for 3 cards
+     *
+     * @return True if he wants to use the Factory power
+     */
+    @Override
+    public boolean logicFactory() {
+<span class="fc bfc" id="L260" title="All 4 branches covered.">        return (getGold() &gt; 7 &amp;&amp; getNumberDistrictPlaced() &lt; 4);</span>
+    }
+
+    /**
+     * Logic if the bot has the Graveyard district
+     *
+     * If the destroyed district has already been placed by the player then he does not buy it.
+     * Otherwise, if it is a special district, he buys it.
+     * If not, he buys it only if the value of the district is higher than 2.
+     *
+     * @param destructedDistrict The district that has been destroyed
+     * @return True if the bot want to re-buy it
+     */
+    @Override
+    public boolean logicGraveyard(District destructedDistrict) {
+<span class="fc bfc" id="L275" title="All 2 branches covered.">        if (isDistrictAlreadyPlaced(destructedDistrict.getName())) {</span>
+<span class="fc" id="L276">            return false;</span>
+        }
+<span class="fc bfc" id="L278" title="All 2 branches covered.">        if (destructedDistrict.getCategory() == CategoryEnum.UNIQUE.getValue()){</span>
+<span class="fc" id="L279">            return true;</span>
+        }
+<span class="fc bfc" id="L281" title="All 2 branches covered.">        return destructedDistrict.getValue() &gt; 2;</span>
+    }
+
+        /**
+     * Logic of the bot if he is the Thief
+     *
+     * Steals from a character other than himself and the Assassin and the discarded character
+     *
+     * @return The character id to steal
+     */
+    @Override
+    public int logicThief() {
+
+        //get a bot that is not him
+<span class="fc" id="L295">        AtomicInteger id = new AtomicInteger();</span>
+<span class="fc" id="L296">        id.set(-1);</span>
+
+        //if no one is revealed
+<span class="pc bpc" id="L299" title="1 of 2 branches missed.">        if (id.get() == -1) {</span>
+<span class="fc" id="L300">            getGameView().getListAllCharacters().forEach(c -&gt; {</span>
+<span class="fc bfc" id="L301" title="All 4 branches covered.">                if (c.getId() != getCharacterId() &amp;&amp; c.getId() != ASSASSIN.getId()) {</span>
+<span class="fc" id="L302">                    boolean cIsDiscarded = false;</span>
+<span class="fc bfc" id="L303" title="All 2 branches covered.">                    for (Character discardedChar : getGameView().getVisibleDiscarded()) {</span>
+<span class="fc bfc" id="L304" title="All 2 branches covered.">                        if (discardedChar.getId() == c.getId()) {</span>
+<span class="fc" id="L305">                            cIsDiscarded = true;</span>
+<span class="fc" id="L306">                            break;</span>
+                        }
+<span class="fc" id="L308">                    }</span>
+<span class="fc bfc" id="L309" title="All 2 branches covered.">                    if (!cIsDiscarded) id.set(c.getId());</span>
+                }
+<span class="fc" id="L311">            });</span>
+        }
+
+        //try to steal the bot
+<span class="fc" id="L315">        return id.get();</span>
+    }
+
+    /**
+     * Choose in that order : unique, then military or religious, then juste non-owned district
+     *
+     * @param districtsPicked The arraylist containing the different districts proposed to the bot
+     * @return district chosen
+     */
+    @Override
+    public District chooseOneCard(ArrayList&lt;District&gt; districtsPicked) {
+        // first check for unique non-owned district
+<span class="fc bfc" id="L327" title="All 2 branches covered.">        for (District district : districtsPicked) {</span>
+<span class="fc bfc" id="L328" title="All 4 branches covered.">            if (!isPlayerHaveDistrict(district) &amp;&amp; district.getCategory() == CategoryEnum.UNIQUE.getValue())</span>
+<span class="fc" id="L329">                return district;</span>
+<span class="fc" id="L330">        }</span>
+        // then check for religious or military non-owned district
+<span class="fc bfc" id="L332" title="All 2 branches covered.">        for (District district : districtsPicked) {</span>
+<span class="fc bfc" id="L333" title="All 6 branches covered.">            if (!isPlayerHaveDistrict(district) &amp;&amp; (district.getCategory() == CategoryEnum.MILITARY.getValue() || district.getCategory() == CategoryEnum.RELIGIOUS.getValue()))</span>
+<span class="fc" id="L334">                return district;</span>
+<span class="fc" id="L335">        }</span>
+        // then check for non-owned district
+<span class="fc bfc" id="L337" title="All 2 branches covered.">        for (District district : districtsPicked) {</span>
+<span class="fc bfc" id="L338" title="All 2 branches covered.">            if (!isPlayerHaveDistrict(district))</span>
+<span class="fc" id="L339">                return district;</span>
+<span class="fc" id="L340">        }</span>
+        // otherwise, use the default choice
+<span class="fc" id="L342">        return super.chooseOneCard(districtsPicked);</span>
+    }
+
+    /**
+     * Logic of the bot if he is the Magician
+     *
+     * First try to exchange the card with the player with the biggest city (if &gt;5 districts placed)
+     *
+     * Otherwise :
+     * If he has less than 3 card in hand, Swap cards with the person who has the most cards.
+     * If not, exchange with the deck the cards he already has.
+     *
+     * Return an int == -1 to exchange all his cards with the deck
+     * Return an 0 &lt;= int &lt; nbBot to exchange the hand with bot hand
+     */
+    @Override
+    public int logicMagician() {
+        // endGame strategy
+<span class="pc bpc" id="L360" title="1 of 2 branches missed.">        if (getGameView().getSizeBiggerCity() &gt;= 5) {</span>
+<span class="fc" id="L361">            BotView botToChoose = null;</span>
+<span class="fc" id="L362">            int citySize = 0;</span>
+<span class="fc bfc" id="L363" title="All 2 branches covered.">            for (BotView bot : getGameView().getListAllBots()) {</span>
+<span class="pc bpc" id="L364" title="1 of 10 branches missed.">                if (bot.getID() != getID() &amp;&amp; bot.getDistrictsPlacedSize() &gt; citySize &amp;&amp; bot.getDistrictsPlacedSize() &lt; 7 &amp;&amp; bot.getDistrictsPlacedSize() &gt;= 5 &amp;&amp; bot.getNbCardHand() &gt; 0) {</span>
+<span class="fc" id="L365">                    botToChoose = bot;</span>
+<span class="fc" id="L366">                    citySize = bot.getDistrictsPlacedSize();</span>
+                }
+<span class="fc" id="L368">            }</span>
+<span class="fc bfc" id="L369" title="All 2 branches covered.">            if (botToChoose != null)</span>
+<span class="fc" id="L370">                return botToChoose.getID();</span>
+        }
+
+        // Non-endgame strategy
+<span class="fc" id="L374">        AtomicInteger choice = new AtomicInteger(-2);</span>
+<span class="fc" id="L375">        AtomicInteger maxNb = new AtomicInteger(getHandSize());</span>
+<span class="fc bfc" id="L376" title="All 2 branches covered.">        if (getHandSize() &lt; 3){</span>
+<span class="fc" id="L377">            getGameView().getListAllBots().forEach(bot -&gt; {</span>
+<span class="fc bfc" id="L378" title="All 2 branches covered.">                if (bot.getNbCardHand() &gt; maxNb.get()) {</span>
+<span class="fc" id="L379">                    choice.set(bot.getID());</span>
+<span class="fc" id="L380">                    maxNb.set(bot.getNbCardHand());</span>
+                }
+<span class="fc" id="L382">            });</span>
+        }
+
+<span class="fc bfc" id="L385" title="All 2 branches covered.">        if (choice.get() == -2) choice.set(-1);</span>
+<span class="fc" id="L386">        return choice.get();</span>
+    }
+
+    @Override
+    public ArrayList&lt;District&gt; discardList() {
+<span class="fc" id="L391">        ArrayList&lt;District&gt; discards = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L392" title="All 2 branches covered.">        for (District district : getHandList()) {</span>
+<span class="fc bfc" id="L393" title="All 2 branches covered.">            if (isDistrictAlreadyPlaced(district.getName())) discards.add(district);</span>
+<span class="fc" id="L394">        }</span>
+<span class="fc" id="L395">        return discards;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L400">        return &quot;(Richard) -&gt;&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Character.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projet2-e</a> &gt; <a href="index.source.html" class="el_package">citadelles.characters</a> &gt; <span class="el_source">Character.java</span></div><h1>Character.java</h1><pre class="source lang-java linenums">package citadelles.characters;
+
+import citadelles.LogManager;
+import citadelles.bots.Bot;
+import citadelles.bots.Referee;
+import citadelles.districts.CategoryEnum;
+
+/**
+ * abstract class that serve as basis for character classes
+ */
+public abstract class Character {
+    private final int id;
+    private final String role;
+    private Bot currentBot;
+
+    /**
+     * Create a Character
+     *
+     * @param enumsCharacter list of character
+     */
+<span class="fc" id="L21">    protected Character(CharacterEnum enumsCharacter) {</span>
+<span class="fc" id="L22">        this.id = enumsCharacter.getId();</span>
+<span class="fc" id="L23">        this.role = enumsCharacter.getRole();</span>
+<span class="fc" id="L24">    }</span>
+
+    /**
+     * Action of the character link to a Bot
+     *
+     * NB: is overridden by extended class
+     */
+    public void action() {
+<span class="nc" id="L32">    }</span>
+
+    /**
+     * Action of the character to the very start of his turn
+     *
+     * NB: is overridden by extended class
+     */
+    public void startTurnAction() {
+<span class="nc" id="L40">    }</span>
+
+    /**
+     * Action of the character link to a Bot
+     *
+     * NB: is overridden by extended class
+     */
+    public void earningsForDistricts() {
+<span class="nc" id="L48">    }</span>
+
+    /**
+     * Get the gold for having district in a the category of the character
+     *
+     * @param category The category
+     */
+    public void getGoldPerDistrictCategory(CategoryEnum category) {
+<span class="fc" id="L56">        Referee referee = new Referee();</span>
+<span class="fc" id="L57">        referee.addGoldPerDistrictCategory(getCurrentBot(), category);</span>
+<span class="fc" id="L58">    }</span>
+
+    /**
+     * get the current bot
+     *
+     * @return Bot object
+     */
+    public Bot getCurrentBot() {
+<span class="fc" id="L66">        return currentBot;</span>
+    }
+
+    /**
+     * initialise the current bot
+     *
+     * @param currentBot Bot object
+     */
+    public void setCurrentBot(Bot currentBot) {
+<span class="fc" id="L75">        this.currentBot = currentBot;</span>
+<span class="fc" id="L76">    }</span>
+
+    /**
+     * get the ID of the current bot
+     *
+     * @return int
+     */
+    public int getCurrentBotID() {
+<span class="nc" id="L84">        return currentBot.getID();</span>
+    }
+
+    /**
+     * get the character of the Bot in the current turn
+     *
+     * @return String
+     */
+    public String getRole() {
+<span class="fc" id="L93">        return role;</span>
+    }
+
+    /**
+     * return the id of the character
+     *
+     * @return int
+     */
+    public int getId() {
+<span class="fc" id="L102">        return id;</span>
+    }
+
+    /**
+     * Concatenate the log with new log
+     *
+     * @param log String
+     */
+    void addLog(String log) {
+<span class="nc" id="L111">        LogManager.log += log + &quot;\n&quot;;</span>
+<span class="nc" id="L112">    }</span>
+
+    public void getCardOrGold() {
+<span class="fc" id="L115">        currentBot.chooseCardOrGold();</span>
+<span class="fc" id="L116">    }</span>
+
+    public void placeDistrict() {
+<span class="fc" id="L119">        currentBot.eventuallyPlaceADistrict();</span>
+<span class="fc" id="L120">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

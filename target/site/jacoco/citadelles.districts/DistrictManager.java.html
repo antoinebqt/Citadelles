@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DistrictManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projet2-e</a> &gt; <a href="index.source.html" class="el_package">citadelles.districts</a> &gt; <span class="el_source">DistrictManager.java</span></div><h1>DistrictManager.java</h1><pre class="source lang-java linenums">package citadelles.districts;
+
+import java.util.ArrayList;
+
+/**
+ * main class of districts package. Can be seen as a deck of districts
+ */
+public class DistrictManager {
+
+    private final ArrayList&lt;District&gt; districtsList;
+
+    /**
+     * Create a list that will contain all the districts
+     */
+<span class="fc" id="L15">    public DistrictManager() {</span>
+<span class="fc" id="L16">        districtsList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L17">        initList();</span>
+<span class="fc" id="L18">    }</span>
+
+    /**
+     * Initialize the district's list from
+     * the CSV file using the CSVReader class
+     */
+    void initList() {
+        //add the &quot;classical&quot; districts
+<span class="fc" id="L26">        CSVReader csvReader = new CSVReader();</span>
+<span class="fc" id="L27">        String FILEPATH_DATA = System.getProperty(&quot;user.dir&quot;) + &quot;/src/main/data/districtsData.csv&quot;;</span>
+<span class="fc" id="L28">        csvReader.getCsvToDistricts(districtsList, FILEPATH_DATA);</span>
+
+        //add specials ones
+<span class="fc" id="L31">        districtsList.add(new DragonGate());</span>
+<span class="fc" id="L32">        districtsList.add(new Factory());</span>
+<span class="fc" id="L33">        districtsList.add(new Graveyard());</span>
+<span class="fc" id="L34">        districtsList.add(new Keep());</span>
+<span class="fc" id="L35">        districtsList.add(new Laboratory());</span>
+<span class="fc" id="L36">        districtsList.add(new Library());</span>
+<span class="fc" id="L37">        districtsList.add(new MiracleCourtyard());</span>
+<span class="fc" id="L38">        districtsList.add(new Observatory());</span>
+<span class="fc" id="L39">        districtsList.add(new SchoolOfMagic());</span>
+<span class="fc" id="L40">        districtsList.add(new University());</span>
+<span class="fc" id="L41">    }</span>
+
+    /**
+     * Get a random index for pick a random
+     * card in the district's list
+     *
+     * @return a random int
+     */
+    private int getRandomIndex() {
+<span class="fc" id="L50">        return (int) (Math.random() * (districtsList.size() - 1));</span>
+    }
+
+    /**
+     * Get a random Card from the Deck
+     *
+     * @return a District
+     */
+    public District pickRandomCard() {
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if (districtsList.size() &gt; 0) {</span>
+<span class="fc" id="L60">            int index = getRandomIndex();</span>
+<span class="fc" id="L61">            District district = districtsList.get(index);</span>
+<span class="fc" id="L62">            districtsList.remove(index);</span>
+<span class="fc" id="L63">            return district;</span>
+        }
+        //In case that the district list is empty, return null
+        else {
+<span class="nc" id="L67">            return null;</span>
+        }
+    }
+
+    /**
+     * Get the list of districts
+     *
+     * @return the district's list
+     */
+    public ArrayList&lt;District&gt; getDistrictList() {
+<span class="fc" id="L77">        return districtsList;</span>
+    }
+
+    /**
+     * Add all the districts in the list
+     *
+     * @param districts List of district
+     */
+    public void addDistricts(ArrayList&lt;District&gt; districts) {
+<span class="fc" id="L86">        districtsList.addAll(districts);</span>
+<span class="fc" id="L87">    }</span>
+
+    /**
+     * Add the District passed
+     *
+     * @param district a district
+     */
+    public void addDistricts(District district) {
+<span class="fc" id="L95">        districtsList.add(district);</span>
+<span class="fc" id="L96">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

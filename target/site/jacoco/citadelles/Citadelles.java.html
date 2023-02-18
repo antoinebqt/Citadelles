@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Citadelles.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projet2-e</a> &gt; <a href="index.source.html" class="el_package">citadelles</a> &gt; <span class="el_source">Citadelles.java</span></div><h1>Citadelles.java</h1><pre class="source lang-java linenums">package citadelles;
+
+import citadelles.bots.Bot;
+import citadelles.bots.BotManager;
+import citadelles.bots.Referee;
+import citadelles.characters.CharacterManager;
+import citadelles.districts.CategoryEnum;
+import citadelles.districts.District;
+import citadelles.districts.DistrictManager;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static com.diogonunes.jcolor.Ansi.colorize;
+import static com.diogonunes.jcolor.Attribute.GREEN_TEXT;
+
+/**
+ * Main class of the project. Used to create and manipulate all the game
+ * is used by the main class
+ */
+public class Citadelles {
+    private static BotManager botManager;
+    private final LogManager logManager;
+    private final CharacterManager characterManager;
+<span class="fc" id="L29">    private static final Logger normalExecution = Logger.getLogger(&quot;Normal&quot;);</span>
+<span class="fc" id="L30">    private static final Logger simulationExecution = Logger.getLogger(&quot;Simulation&quot;);</span>
+    private final int numberOfBots;
+    private final int nbSmartBot;
+    private final int nbMediumBot;
+    private final int nbStupidBot;
+    private final int nbTricTracBot;
+    private int finishPosition;
+    private int finishTurn;
+
+    /**
+     * Constructor of the game.
+     * Call the botManager class to initialize bots.
+     */
+<span class="fc" id="L43">    Citadelles(int nbSmartBot, int nbMediumBot, int nbStupidBot, int nbTricTracBot) {</span>
+<span class="fc" id="L44">        this.nbSmartBot = nbSmartBot;</span>
+<span class="fc" id="L45">        this.nbMediumBot = nbMediumBot;</span>
+<span class="fc" id="L46">        this.nbStupidBot = nbStupidBot;</span>
+<span class="fc" id="L47">        this.nbTricTracBot = nbTricTracBot;</span>
+
+<span class="fc" id="L49">        numberOfBots = getNumberOfBots();</span>
+<span class="fc" id="L50">        characterManager = new CharacterManager(numberOfBots);</span>
+<span class="fc" id="L51">        botManager = new BotManager(nbSmartBot, nbMediumBot, nbStupidBot, nbTricTracBot, new DistrictManager());</span>
+<span class="fc" id="L52">        logManager = new LogManager(botManager);</span>
+<span class="fc" id="L53">        finishPosition = 1;</span>
+<span class="fc" id="L54">        finishTurn = 0;</span>
+<span class="fc" id="L55">    }</span>
+
+    /**
+     * Get the bot manager
+     *
+     * @return The bot manager
+     */
+    public static BotManager getBotManager() {
+<span class="fc" id="L63">        return botManager;</span>
+    }
+
+    /**
+     * Get the number of bots
+     *
+     * @return The number of bot
+     */
+    public int getNumberOfBots() {
+<span class="fc" id="L72">        return nbSmartBot + nbMediumBot + nbStupidBot + nbTricTracBot;</span>
+    }
+
+    /**
+     * Method who launch the game.
+     */
+    void launch() {
+            int crowned;
+<span class="nc" id="L80">            boolean isEnd = false;</span>
+
+<span class="nc" id="L82">            botManager.setTheCrownToARandomBot(numberOfBots);</span>
+<span class="nc" id="L83">            GameView gameView = new GameView(botManager, characterManager);</span>
+
+<span class="nc" id="L85">            int i = 1;</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">            while (!isEnd) {</span>
+                //Reset the list of character
+<span class="nc" id="L88">                characterManager.init();</span>
+
+<span class="nc" id="L90">                normalExecution.log(Level.INFO, colorize(&quot;++++++++++++++++++++++++++++ Turn : &quot; + (i) + &quot; ++++++++++++++++++++++++++++&quot;, GREEN_TEXT()));</span>
+
+<span class="nc" id="L92">                crowned = botManager.getTheBotWithTheCrown();</span>
+<span class="nc" id="L93">                logManager.showTheCrownedBot(crowned);</span>
+
+<span class="nc" id="L95">                characterTurn(crowned, gameView);</span>
+<span class="nc" id="L96">                showCharacters();</span>
+
+<span class="nc" id="L98">                isEnd = gameTurn(gameView, i);</span>
+
+<span class="nc" id="L100">                showEndLog();</span>
+<span class="nc" id="L101">                logManager.showResume();</span>
+
+<span class="nc" id="L103">                i++;</span>
+<span class="nc" id="L104">                botManager.changeCrownedPlayer(crowned);</span>
+
+<span class="nc bnc" id="L106" title="All 2 branches missed.">                if (i &gt; 100) break;</span>
+            }
+<span class="nc" id="L108">    }</span>
+
+    /**
+     * Initialise the characters of each player
+     * the order of choice is defined by the crowned player
+     *
+     * @param crowned int
+     */
+    private void characterTurn(int crowned, GameView gameView) {
+<span class="nc bnc" id="L117" title="All 2 branches missed.">        for (int j = 0; j &lt; numberOfBots; j++) {</span>
+<span class="nc" id="L118">            getBots().get(j).setAlive();</span>
+<span class="nc" id="L119">            characterManager.pickPlayerCharacter(getBots().get((j + crowned) % numberOfBots));</span>
+        }
+<span class="nc" id="L121">        gameView.updateCharacterList();</span>
+<span class="nc" id="L122">    }</span>
+
+    /**
+     * Check for each role, if a bot has this role. If yes -&gt; the bot play, if no -&gt; continue
+     */
+
+    private boolean gameTurn(GameView gameView, int turn) {
+<span class="nc" id="L129">        AtomicBoolean isEnd = new AtomicBoolean(false);</span>
+
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        for (int k = 0; k &lt; 8; k++) {</span>
+<span class="nc" id="L132">            int finalK = k;</span>
+<span class="nc" id="L133">            getBots().forEach(bot -&gt; {</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">                if (finalK == bot.getCharacterId()) {</span>
+<span class="nc" id="L135">                    bot.play(gameView, turn);</span>
+<span class="nc" id="L136">                    gameView.updateView();</span>
+<span class="nc" id="L137">                    showLog();</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">                    if (result(bot, turn)) {</span>
+<span class="nc" id="L139">                        isEnd.set(true);</span>
+                    }
+                }
+<span class="nc" id="L142">            });</span>
+        }
+<span class="nc" id="L144">        return isEnd.get();</span>
+    }
+
+    /**
+     * Check if the game is finish or not
+     *
+     * @return boolean
+     */
+    public boolean result(Bot bot, int turn) {
+
+<span class="fc bfc" id="L154" title="All 2 branches covered.">        if (bot.getNumberDistrictPlaced() &gt;= 7) {</span>
+<span class="fc" id="L155">            bot.setFinishPosition(finishPosition++);</span>
+<span class="fc" id="L156">            setFinishTurn(turn);</span>
+<span class="fc" id="L157">            return true;</span>
+        } else {
+<span class="fc" id="L159">            return false;</span>
+        }
+    }
+
+    /**
+     * Print the result
+     */
+    void showResult() throws IOException {
+<span class="nc" id="L167">        finalScoreCalculator();</span>
+<span class="nc" id="L168">        logManager.showResult();</span>
+<span class="nc" id="L169">    }</span>
+
+    void showSimulation(){
+<span class="nc" id="L172">        logManager.showLogSimulation();</span>
+<span class="nc" id="L173">    }</span>
+
+    /**
+     * Calculate the final score of each bot by checking
+     * the district placed and the finish position
+     */
+    public void finalScoreCalculator() {
+<span class="fc bfc" id="L180" title="All 2 branches covered.">        for (Bot bot : getBots()) {</span>
+
+<span class="fc bfc" id="L182" title="All 2 branches covered.">            if (bot.getFinishPosition() == 1) {</span>
+<span class="fc" id="L183">                bot.addScore(4);</span>
+<span class="fc bfc" id="L184" title="All 2 branches covered.">            } else if (bot.getFinishPosition() &gt; 1) {</span>
+<span class="fc" id="L185">                bot.addScore(2);</span>
+            }
+
+<span class="fc" id="L188">            ArrayList&lt;District&gt; districtsPlaced = bot.getDistrictPlaced();</span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">            for (District district : districtsPlaced) {</span>
+<span class="fc" id="L190">                bot.addScore(district.getEndGameValue());</span>
+<span class="fc" id="L191">            }</span>
+
+<span class="fc bfc" id="L193" title="All 2 branches covered.">            if (doHaveAllCategoriesPlaced(bot)) {</span>
+<span class="fc" id="L194">                bot.addScore(3);</span>
+            }
+<span class="fc" id="L196">        }</span>
+<span class="fc" id="L197">    }</span>
+
+    /**
+     * Check if a bot has all the categories placed
+     *
+     * @param bot The bot to check
+     * @return True if yes, false otherwise
+     */
+    public boolean doHaveAllCategoriesPlaced(Bot bot) {
+<span class="fc" id="L206">        ArrayList&lt;District&gt; districtPlaced = bot.getDistrictPlaced();</span>
+
+<span class="fc bfc" id="L208" title="All 2 branches covered.">        if (districtPlaced.size() &lt; CategoryEnum.values().length) {</span>
+<span class="fc" id="L209">            return false;</span>
+        }
+
+<span class="fc" id="L212">        ArrayList&lt;Integer&gt; categoryPlaced = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L214" title="All 2 branches covered.">        for (District district : districtPlaced) {</span>
+<span class="fc bfc" id="L215" title="All 2 branches covered.">            if (!(categoryPlaced.contains(district.getCategory()))) {</span>
+<span class="fc" id="L216">                categoryPlaced.add(district.getCategory());</span>
+            }
+<span class="fc" id="L218">        }</span>
+
+<span class="fc bfc" id="L220" title="All 2 branches covered.">        if (categoryPlaced.size() &gt;= CategoryEnum.values().length) return true;</span>
+
+<span class="fc" id="L222">        return canUseThePowerOfMiracleCourtyard(districtPlaced, categoryPlaced.size());</span>
+    }
+
+    /**
+     * Check if the bot can use the power of the miracle of courtyard
+     *
+     * @param districtPlaced The district placed by the bot
+     * @param numberOfCategory His current number of categories placed
+     * @return True if he can, false otherwise
+     */
+    public boolean canUseThePowerOfMiracleCourtyard(ArrayList&lt;District&gt; districtPlaced, int numberOfCategory) {
+
+        //Check if the bot has the Miracle Courtyard placed
+<span class="fc" id="L235">        int indexOfTheMiracleCourtyard = doHaveTheMiracleCourtyard(districtPlaced);</span>
+<span class="fc bfc" id="L236" title="All 2 branches covered.">        if (indexOfTheMiracleCourtyard == -1) {</span>
+<span class="fc" id="L237">            return false;</span>
+        }
+
+        //The bot must has already 4 categories placed for using the Miracle Courtyard
+<span class="fc bfc" id="L241" title="All 2 branches covered.">        if (numberOfCategory != 4) {</span>
+<span class="fc" id="L242">            return false;</span>
+        }
+
+        //Check if the miracle courtyard has been constructed during the last turn
+<span class="fc bfc" id="L246" title="All 2 branches covered.">        if (districtPlaced.get(indexOfTheMiracleCourtyard).getPlacedDuringTurn() == finishTurn) {</span>
+<span class="fc" id="L247">            return false;</span>
+        }
+
+<span class="fc" id="L250">        Referee referee = new Referee();</span>
+        //Check if the bot has atleast 2 district of category unique
+<span class="pc bpc" id="L252" title="1 of 2 branches missed.">        return referee.numberDistrictInCategory(districtPlaced, CategoryEnum.UNIQUE.getValue()) &gt; 1;</span>
+    }
+
+    /**
+     * Check if the miracle of courtyard is present
+     * in a given arraylist of District object
+     *
+     * @param districtPlaced The district placed by the bot
+     * @return True if the bot has the miracle of courtyard district, false otherwise
+     */
+    private int doHaveTheMiracleCourtyard(ArrayList&lt;District&gt; districtPlaced) {
+<span class="fc bfc" id="L263" title="All 2 branches covered.">        for (int i = 0; i &lt; districtPlaced.size(); i++) {</span>
+<span class="fc bfc" id="L264" title="All 2 branches covered.">            if (Objects.equals(districtPlaced.get(i).getName(), &quot;Miracle Courtyard&quot;)) {</span>
+<span class="fc" id="L265">                return i;</span>
+            }
+        }
+<span class="fc" id="L268">        return -1;</span>
+    }
+
+    /**
+     * Get the list of bots
+     *
+     * @return the bot list
+     */
+    ArrayList&lt;Bot&gt; getBots() {
+<span class="fc" id="L277">        return botManager.getListBot();</span>
+    }
+
+    void showLog() {
+<span class="nc" id="L281">        LogManager.showLog();</span>
+<span class="nc" id="L282">    }</span>
+
+    void showEndLog() {
+<span class="nc" id="L285">        LogManager.showEndLog();</span>
+<span class="nc" id="L286">    }</span>
+
+    void showCharacters() {
+<span class="nc" id="L289">        LogManager.showCharacterLog();</span>
+<span class="nc" id="L290">    }</span>
+
+    void setFinishTurn(int turn) {
+<span class="fc" id="L293">        finishTurn = turn;</span>
+<span class="fc" id="L294">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

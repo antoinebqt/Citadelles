@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CharacterManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projet2-e</a> &gt; <a href="index.source.html" class="el_package">citadelles.characters</a> &gt; <span class="el_source">CharacterManager.java</span></div><h1>CharacterManager.java</h1><pre class="source lang-java linenums">package citadelles.characters;
+
+import citadelles.LogManager;
+import citadelles.bots.Bot;
+
+import java.util.ArrayList;
+
+import static citadelles.LogManager.defaultColor;
+import static com.diogonunes.jcolor.Ansi.colorize;
+import static com.diogonunes.jcolor.Attribute.RED_TEXT;
+
+/**
+ * Main class of the package characters, it can be seen as a deck of cards
+ */
+public class CharacterManager {
+
+    private final ArrayList&lt;Character&gt; characters;
+    private ArrayList&lt;Character&gt; visibleRemovedCharacters;
+    private final int numberOfBots;
+
+    /**
+     * Create the arraylist that will contain
+     * the different character card
+     */
+<span class="fc" id="L25">    public CharacterManager(int nbBot) {</span>
+<span class="fc" id="L26">        characters = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L27">        visibleRemovedCharacters = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L28">        numberOfBots = nbBot;</span>
+<span class="fc" id="L29">    }</span>
+
+    /**
+     * Add the different character to the character's list
+     */
+    public void init() {
+<span class="fc" id="L35">        characters.clear();</span>
+<span class="fc" id="L36">        visibleRemovedCharacters.clear();</span>
+<span class="fc" id="L37">        characters.addAll(initList());</span>
+
+        //Remove card before starting, the king can only be a discarded card face down
+        int index;
+<span class="fc" id="L41">        int discarded = 0, cardToDiscard;</span>
+
+<span class="fc" id="L43">        cardToDiscard = getDiscard();</span>
+
+        do {
+<span class="fc" id="L46">            index = (int) (Math.random() * (characters.size()));</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">            if (discarded == 0) {</span>
+<span class="fc" id="L48">                addCharacterLog(defaultColor(&quot;Discarded card face down: &quot;)</span>
+<span class="fc" id="L49">                        + colorize(characters.get(index).getRole(), RED_TEXT()));</span>
+<span class="fc" id="L50">                discarded++;</span>
+<span class="fc" id="L51">                characters.remove(index);</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">            } else if (characters.get(index).getId() != 3) {</span>
+<span class="fc" id="L53">                addCharacterLog(defaultColor(&quot;Discarded card face up: &quot;)</span>
+<span class="fc" id="L54">                        + colorize(characters.get(index).getRole(), RED_TEXT()));</span>
+<span class="fc" id="L55">                discarded++;</span>
+<span class="fc" id="L56">                visibleRemovedCharacters.add(characters.get(index));</span>
+<span class="fc" id="L57">                characters.remove(index);</span>
+            }
+
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        } while (discarded != cardToDiscard);</span>
+<span class="fc" id="L61">    }</span>
+
+    /**
+     * Iitialize a list with all characters
+     *
+     * @return list of character
+     */
+    public ArrayList&lt;Character&gt; initList() {
+<span class="fc" id="L69">        ArrayList&lt;Character&gt; newList = new ArrayList&lt;&gt;();</span>
+
+        //Create the liste of character
+<span class="fc" id="L72">        newList.add(new Assassin());</span>
+<span class="fc" id="L73">        newList.add(new Thief());</span>
+<span class="fc" id="L74">        newList.add(new Magician());</span>
+<span class="fc" id="L75">        newList.add(new King());</span>
+<span class="fc" id="L76">        newList.add(new Bishop());</span>
+<span class="fc" id="L77">        newList.add(new Merchant());</span>
+<span class="fc" id="L78">        newList.add(new Architect());</span>
+<span class="fc" id="L79">        newList.add(new Warlord());</span>
+
+<span class="fc" id="L81">        return newList;</span>
+    }
+
+    private int getDiscard() {
+<span class="fc bfc" id="L85" title="All 4 branches covered.">        return numberOfBots == 4 ? 3 : numberOfBots == 5 ? 2 : 1;</span>
+    }
+
+    /**
+     * Remove the given character from le list
+     *
+     * @param character chosen by the player
+     */
+    public void removeCharacterChosen(Character character) {
+<span class="fc" id="L94">        characters.remove(character);</span>
+<span class="fc" id="L95">    }</span>
+
+    /**
+     * Get the list of characters
+     *
+     * @return the character's list
+     */
+    public ArrayList&lt;Character&gt; getCharacters() {
+<span class="fc" id="L103">        return characters;</span>
+    }
+
+    public ArrayList&lt;Character&gt; getVisibleRemovedCharacters(){
+<span class="fc" id="L107">        return visibleRemovedCharacters;</span>
+    }
+
+    private void addCharacterLog(String characterLog) {
+<span class="fc" id="L111">        LogManager.characterLog += characterLog + &quot;\n&quot;;</span>
+<span class="fc" id="L112">    }</span>
+
+    /**
+     * The given bot choose a character in the list of character.
+     * The chosen character is set to the bot and is remove from the list.
+     *
+     * @param bot who choose a character
+     */
+    public void pickPlayerCharacter(Bot bot) {
+<span class="fc" id="L121">        Character characterChosen = bot.chooseOneCharacter(characters);</span>
+
+<span class="fc" id="L123">        bot.setCharacter(characterChosen);</span>
+<span class="fc" id="L124">        characterChosen.setCurrentBot(bot);</span>
+
+<span class="fc" id="L126">        removeCharacterChosen(characterChosen);</span>
+
+<span class="fc" id="L128">        addCharacterLog(Bot.addBotNumberLog(bot.getID())</span>
+<span class="fc" id="L129">                + defaultColor(&quot; has chosen the role &quot;)</span>
+<span class="fc" id="L130">                + colorize(characterChosen.getRole(), RED_TEXT()));</span>
+<span class="fc" id="L131">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

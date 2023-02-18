@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Magician.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projet2-e</a> &gt; <a href="index.source.html" class="el_package">citadelles.characters</a> &gt; <span class="el_source">Magician.java</span></div><h1>Magician.java</h1><pre class="source lang-java linenums">package citadelles.characters;
+
+import citadelles.bots.Bot;
+import citadelles.bots.Referee;
+import citadelles.districts.District;
+
+import java.util.ArrayList;
+
+import static citadelles.LogManager.defaultColor;
+
+/**
+ * contain the methods of the magician
+ */
+public class Magician extends Character {
+
+    public Magician() {
+<span class="fc" id="L17">        super(CharacterEnum.MAGICIAN);</span>
+<span class="fc" id="L18">    }</span>
+
+    /**
+     * The magician can exchange his hand with
+     * another player or exchange his card with the deck
+     */
+    @Override
+    public void action() {
+<span class="nc" id="L26">        int exchange = getCurrentBot().logicMagician();</span>
+<span class="nc" id="L27">        Referee referee = new Referee();</span>
+
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        if (exchange &gt;= 0) {</span>
+<span class="nc" id="L30">            referee.exchangeCards(exchange, getCurrentBotID());</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        } else if (exchange == -1) {</span>
+<span class="nc" id="L32">            ArrayList&lt;District&gt; toDiscard = getCurrentBot().discardList();</span>
+<span class="nc" id="L33">            int size = toDiscard.size();</span>
+
+<span class="nc" id="L35">            getCurrentBot().getHand().discard(toDiscard);</span>
+
+<span class="nc" id="L37">            getCurrentBot().pickCard(size);</span>
+<span class="nc" id="L38">            addLog(Bot.addBotNumberLog(getCurrentBotID()) + defaultColor(&quot; discards &quot;) + size</span>
+<span class="nc" id="L39">                    + defaultColor(&quot; districts and takes &quot;) + size + defaultColor(&quot; new districts&quot;));</span>
+        }
+<span class="nc" id="L41">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>
